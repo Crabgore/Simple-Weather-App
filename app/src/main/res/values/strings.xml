@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">SimpleWeatherApp</string>
+    <string name="temp_degrees">%1$s°C</string>
+    <string name="current_temp">Temperature:</string>
+    <string name="current_temp_value">%1$s°C</string>
+    <string name="sunset">Sunset:</string>
+    <string name="sunset_value">%1$s</string>
+    <string name="sunrise">Sunrise:</string>
+    <string name="sunrise_value">%1$s</string>
+    <string name="feels_like">Feels like:</string>
+    <string name="feels_like_value">%1$s°C</string>
+    <string name="pressure">Pressure:</string>
+    <string name="pressure_value">%1$s мбар</string>
+    <string name="humidity">Humidity:</string>
+    <string name="humidity_value">%1$s%%</string>
+    <string name="wind_speed">Wind speed: </string>
+    <string name="wind_speed_value">%1$s м/с</string>
+    <string name="degrees">°C</string>
+    <string name="morning">Morning</string>
+    <string name="day">Day</string>
+    <string name="evening">Evening</string>
+    <string name="night">Night</string>
 </resources>

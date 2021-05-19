@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+
+    <color name="day_color">#eeac8d</color>
+    <color name="day_color_secondary">#e486b0</color>
+    <color name="nigh_color">#5154a1</color>
+    <color name="nigh_color_secondary">#3e3578</color>
 </resources>
