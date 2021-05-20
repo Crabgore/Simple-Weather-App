@@ -38,7 +38,6 @@ import www.sanju.zoomrecyclerlayout.ZoomRecyclerLayout
 import java.util.*
 import javax.inject.Inject
 
-
 class ForecastFragment : DaggerFragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -49,6 +48,7 @@ class ForecastFragment : DaggerFragment() {
     private lateinit var currentLocation: Location
     private var isNight = false
     private var scaled = false
+    private var index = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,6 +61,13 @@ class ForecastFragment : DaggerFragment() {
         super.onViewCreated(view, savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         initUI()
+    }
+
+    fun backPressed() {
+        if (bottomSheetBehavior.state == STATE_EXPANDED)
+            bottomSheetBehavior.state = STATE_COLLAPSED
+        else
+            requireActivity().finish()
     }
 
     @SuppressLint("MissingPermission")
@@ -134,10 +141,14 @@ class ForecastFragment : DaggerFragment() {
 
             SwipeDetector(this).setOnSwipeListener(object : SwipeDetector.OnSwipeEvent {
                 override fun swipeEventDetected(v: View?, swipeType: SwipeTypeEnum?) {
-                    if (swipeType === SwipeTypeEnum.BOTTOM_TO_TOP)
+                    if (swipeType === SwipeTypeEnum.BOTTOM_TO_TOP) {
+                        smoothScrollToPosition(index)
                         bottomSheetBehavior.state = STATE_EXPANDED
-                    if (swipeType === SwipeTypeEnum.TOP_TO_BOTTOM)
+                    }
+                    if (swipeType === SwipeTypeEnum.TOP_TO_BOTTOM) {
+                        smoothScrollToPosition(index)
                         bottomSheetBehavior.state = STATE_COLLAPSED
+                    }
                 }
             })
 
@@ -145,7 +156,7 @@ class ForecastFragment : DaggerFragment() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                        val index = mLayoutManager.findFirstVisibleItemPosition()
+                        index = mLayoutManager.findFirstVisibleItemPosition()
                         performUserAction(index, list[index])
                     }
                 }

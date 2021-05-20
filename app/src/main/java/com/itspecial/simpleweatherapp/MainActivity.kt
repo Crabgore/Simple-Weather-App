@@ -7,6 +7,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import com.itspecial.simpleweatherapp.ui.forecast.ForecastFragment
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -16,6 +18,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         checkPermissions()
+    }
+
+    override fun onBackPressed() {
+        fragmentBackPressed()
     }
 
     private fun checkPermissions() {
@@ -54,5 +60,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
         navController.navigate(R.id.forecastFragment)
+    }
+
+    private fun fragmentBackPressed() {
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val fragment = navHostFragment.childFragmentManager.fragments[0] as ForecastFragment
+        fragment.backPressed()
     }
 }
