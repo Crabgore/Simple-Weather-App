@@ -23,6 +23,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 import com.itspecial.simpleweatherapp.R
+import com.itspecial.simpleweatherapp.common.SwipeDetector
+import com.itspecial.simpleweatherapp.common.SwipeDetector.SwipeTypeEnum
 import com.itspecial.simpleweatherapp.common.scaleView
 import com.itspecial.simpleweatherapp.data.Current
 import com.itspecial.simpleweatherapp.data.Daily
@@ -35,6 +37,7 @@ import kotlinx.android.synthetic.main.fragment_forecast.*
 import www.sanju.zoomrecyclerlayout.ZoomRecyclerLayout
 import java.util.*
 import javax.inject.Inject
+
 
 class ForecastFragment : DaggerFragment() {
     @Inject
@@ -128,6 +131,15 @@ class ForecastFragment : DaggerFragment() {
                     Geocoder(requireContext(), Locale.getDefault()), currentLocation
                 ), isNight
             )
+
+            SwipeDetector(this).setOnSwipeListener(object : SwipeDetector.OnSwipeEvent {
+                override fun swipeEventDetected(v: View?, swipeType: SwipeTypeEnum?) {
+                    if (swipeType === SwipeTypeEnum.BOTTOM_TO_TOP)
+                        bottomSheetBehavior.state = STATE_EXPANDED
+                    if (swipeType === SwipeTypeEnum.TOP_TO_BOTTOM)
+                        bottomSheetBehavior.state = STATE_COLLAPSED
+                }
+            })
 
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
