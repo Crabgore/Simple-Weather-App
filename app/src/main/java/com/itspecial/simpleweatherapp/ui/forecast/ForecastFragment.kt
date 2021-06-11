@@ -11,6 +11,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.viewModels
@@ -28,6 +29,7 @@ import com.itspecial.simpleweatherapp.common.SwipeDetector.SwipeTypeEnum
 import com.itspecial.simpleweatherapp.common.scaleView
 import com.itspecial.simpleweatherapp.data.Current
 import com.itspecial.simpleweatherapp.data.Daily
+import com.itspecial.simpleweatherapp.data.Status.*
 import com.itspecial.simpleweatherapp.ui.adapters.CurrentAdapter
 import com.itspecial.simpleweatherapp.ui.adapters.DailyAdapter
 import com.itspecial.simpleweatherapp.ui.adapters.ForecastAdapter
@@ -75,9 +77,7 @@ class ForecastFragment : DaggerFragment() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             location?.let {
                 currentLocation = it
-                startObservers()
-                viewModel.getDailyWeather(it.latitude, it.longitude)
-                viewModel.getHourlyWeather(it.latitude, it.longitude)
+                startObservers(it)
             } ?: showLocationError()
         }
         val nightModeFlags = requireContext().resources.configuration.uiMode and
@@ -111,18 +111,46 @@ class ForecastFragment : DaggerFragment() {
         }
     }
 
-    private fun startObservers() {
-        viewModel.dailyLiveData.observe(viewLifecycleOwner, { data ->
-            data?.let {
-                setRecycler(it)
-            }
-        })
+    private fun startObservers(location: Location) {
+        viewModel.getDailyWeather(location.latitude, location.longitude)
+            .observe(viewLifecycleOwner, { data ->
+                data?.let { resource ->
+                    when (resource.status) {
+                        SUCCESS -> resource.data?.let { response ->
+                            response.daily?.let {
+                                setRecycler(it)
+                            }
+                        }
+                        ERROR -> Toast.makeText(
+                            requireContext(),
+                            resource.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                        LOADING -> loading.visibility = VISIBLE
+                    }
+                }
+            })
 
-        viewModel.hourlyLiveData.observe(viewLifecycleOwner, { data ->
-            data?.let {
-                setUpBottomSheet(info_rv, temp_rv, it, listOf())
-            }
-        })
+        viewModel.getHourlyWeather(location.latitude, location.longitude)
+            .observe(viewLifecycleOwner, { data ->
+                data?.let { resource ->
+                    when (resource.status) {
+                        SUCCESS -> resource.data?.let { response ->
+                            response.hourly?.let {
+                                setUpBottomSheet(info_rv, temp_rv, it, listOf())
+                            }
+                        }
+                        ERROR -> Toast.makeText(
+                            requireContext(),
+                            resource.message,
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
+                        LOADING -> {
+                        }
+                    }
+                }
+            })
     }
 
     private fun setRecycler(list: List<Daily>) {

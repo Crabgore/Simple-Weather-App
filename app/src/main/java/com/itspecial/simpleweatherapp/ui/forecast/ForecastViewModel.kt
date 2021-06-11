@@ -2,71 +2,37 @@ package com.itspecial.simpleweatherapp.ui.forecast
 
 import android.location.Geocoder
 import android.location.Location
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
 import com.itspecial.simpleweatherapp.Const.MyPreferences.Companion.DAILY
 import com.itspecial.simpleweatherapp.Const.MyPreferences.Companion.HOURLY
 import com.itspecial.simpleweatherapp.base.BaseViewModel
-import com.itspecial.simpleweatherapp.common.getCurrentDateString
-import com.itspecial.simpleweatherapp.data.Current
-import com.itspecial.simpleweatherapp.data.Daily
-import com.itspecial.simpleweatherapp.data.WeatherResponse
+import com.itspecial.simpleweatherapp.data.Resource
 import com.itspecial.simpleweatherapp.domain.Remote
-import com.itspecial.simpleweatherapp.common.parseError
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import timber.log.Timber
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 
 class ForecastViewModel @Inject constructor(
     private val remote: Remote
 ) : BaseViewModel() {
-    val hourlyLiveData: MutableLiveData<List<Current>> = MutableLiveData()
-    val dailyLiveData: MutableLiveData<List<Daily>> = MutableLiveData()
     private var cityName = ""
 
-    fun getDailyWeather(lat: Double, lon: Double) {
-        Timber.d("Getting Weather Data $lat $lon")
-        val disposable = remote.getWeather(lat, lon, HOURLY)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnError(::onWeatherError)
-            .subscribe(::parseWeatherResponse, ::handleFailure)
 
-        addDisposable(disposable)
-    }
-
-    fun getHourlyWeather(lat: Double, lon: Double) {
-        Timber.d("Getting Weather Data $lat $lon")
-        val disposable = remote.getWeather(lat, lon, DAILY)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnError(::onWeatherError)
-            .subscribe(::parseHourlyResponse, ::handleFailure)
-
-        addDisposable(disposable)
-    }
-
-    private fun onWeatherError(throwable: Throwable?) {
-        Timber.d("Ошибка получения погоды' ${parseError(throwable)}")
-    }
-
-    private fun parseWeatherResponse(response: WeatherResponse) {
-        Timber.d("Погода получена $response")
-        dailyLiveData.value = response.daily
-    }
-
-    private fun parseHourlyResponse(response: WeatherResponse) {
-        Timber.d("Погода получена $response")
-        val list: MutableList<Current> = mutableListOf()
-        response.hourly?.let {
-            for (i in it.indices) {
-                if (getCurrentDateString(it[i].dt!!) != "01:00")
-                    list.add(it[i])
-                else
-                    break
-            }
+    fun getDailyWeather(lat: Double, lon: Double) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(Resource.success(data = remote.getWeather(lat, lon, HOURLY)))
+        } catch (exception: Exception) {
+            emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
         }
-        hourlyLiveData.value = list
+    }
+
+    fun getHourlyWeather(lat: Double, lon: Double) = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(Resource.success(data = remote.getWeather(lat, lon, DAILY)))
+        } catch (exception: Exception) {
+            emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
+        }
     }
 
     fun getCityName(geo: Geocoder, location: Location?): String {
