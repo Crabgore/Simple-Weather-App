@@ -26,6 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 import com.itspecial.simpleweatherapp.R
 import com.itspecial.simpleweatherapp.common.SwipeDetector
 import com.itspecial.simpleweatherapp.common.SwipeDetector.SwipeTypeEnum
+import com.itspecial.simpleweatherapp.common.getCurrentDateString
 import com.itspecial.simpleweatherapp.common.scaleView
 import com.itspecial.simpleweatherapp.data.Current
 import com.itspecial.simpleweatherapp.data.Daily
@@ -137,7 +138,14 @@ class ForecastFragment : DaggerFragment() {
                     when (resource.status) {
                         SUCCESS -> resource.data?.let { response ->
                             response.hourly?.let {
-                                setUpBottomSheet(info_rv, temp_rv, it, listOf())
+                                val list: MutableList<Current> = mutableListOf()
+                                    for (i in it.indices) {
+                                        if (getCurrentDateString(it[i].dt!!) != "01:00")
+                                            list.add(it[i])
+                                        else
+                                            break
+                                    }
+                                setUpBottomSheet(info_rv, temp_rv, list, listOf())
                             }
                         }
                         ERROR -> Toast.makeText(
