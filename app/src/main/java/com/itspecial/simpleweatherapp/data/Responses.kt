@@ -95,5 +95,5 @@ data class Temp (
 @JsonClass(generateAdapter = true)
 data class Minutely (
     val dt: Long? = null,
-    val precipitation: Long? = null
+    val precipitation: Double? = null
 )
