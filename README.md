@@ -1,2 +1,2 @@
 # Simple-Weather-App
-Simple Weather App
+Простое погодное приложение
